@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyLibrary - Exquisite Book Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h1>MyLibrary</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-view="dashboard">Dashboard</li>
+                <li data-view="library">My Library</li>
+                <li data-view="wishlist">Wishlist & Recs</li>
+                <li data-view="ledger">Lending Ledger</li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <!-- Header (Search/Add Book) -->
+            <header>
+                <h2>Welcome Back!</h2>
+                <button id="add-book-btn" class="primary-btn">+ Add Book</button>
+            </header>
+
+            <!-- Views -->
+            <div id="views">
+                <!-- Dashboard View -->
+                <section id="dashboard-view" class="view active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Books</h3>
+                            <p id="stat-total">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>To Read</h3>
+                            <p id="stat-toread">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Lent Out</h3>
+                            <p id="stat-lent">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Library View -->
+                <section id="library-view" class="view">
+                    <h3>My Owned Library</h3>
+                    <div class="book-grid" id="library-grid"></div>
+                </section>
+
+                <!-- Wishlist View -->
+                <section id="wishlist-view" class="view">
+                    <h3>Wishlist (To Read / To Buy)</h3>
+                    <div class="book-grid" id="wishlist-grid"></div>
+
+                    <h3 class="margin-top">✨ Recommended Buy Matches (Top Rated)</h3>
+                    <div class="book-grid" id="recommendation-grid"></div>
+                </section>
+
+                <!-- Ledger View -->
+                <section id="ledger-view" class="view">
+                    <h3>Lending Ledger</h3>
+                    <div class="book-grid" id="ledger-grid"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Book Modal -->
+    <div id="book-modal" class="modal hidden">
+        <div class="modal-content glass">
+            <span class="close-btn">&times;</span>
+            <h3 id="modal-title">Add a Book</h3>
+            <form id="book-form">
+                <input type="hidden" id="book-id">
+                
+                <!-- If Title/Author is entered, we can trigger external fetch in backend -->
+                <label>Title</label>
+                <input type="text" id="book-title" required placeholder="e.g. Dune">
+
+                <label>Author</label>
+                <input type="text" id="book-author" placeholder="e.g. Frank Herbert">
+
+                <label>Genre <small>(Leave blank to auto-fetch)</small></label>
+                <input type="text" id="book-genre" placeholder="e.g. Science Fiction">
+
+                <label>Status</label>
+                <select id="book-status">
+                    <option value="Owned">Owned</option>
+                    <option value="ToRead">To Read</option>
+                    <option value="ToBuy">To Buy</option>
+                </select>
+
+                <div id="personal-rating-container">
+                    <label>Personal Rating (1-5) <small>(Optional / For after you've read it)</small></label>
+                    <input type="number" id="book-rating" min="0" max="5" value="0">
+                </div>
+
+                <div id="notes-container">
+                    <label>Notes & Thoughts <small>(Optional)</small></label>
+                    <textarea id="book-notes" placeholder="Write your thoughts here..." rows="3"></textarea>
+                </div>
+
+                <div id="lending-section">
+                    <label>Lending Status</label>
+                    <select id="book-lent-status">
+                        <option value="None">None</option>
+                        <option value="LentOut">Lent Out</option>
+                        <option value="Borrowed">Borrowed</option>
+                    </select>
+
+                    <label id="person-label">Person Name</label>
+                    <input type="text" id="book-person" placeholder="Name of friend">
+                    
+                    <label id="date-label">Transaction Date</label>
+                    <input type="date" id="book-date">
+                </div>
+
+                <button type="submit" class="primary-btn submit-btn">Save Book</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
