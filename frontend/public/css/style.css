@@ -17,6 +17,16 @@
     padding: 0;
 }
 
+input, select, textarea {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
 body {
     background: linear-gradient(135deg, var(--bg-color), #090e17);
     color: var(--text-primary);
@@ -179,69 +189,54 @@ header {
 }
 
 /* View Header & Controls */
-.view-header {
+.search-container-slim {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2.5rem;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-}
-
-.controls {
-    display: flex;
+    width: 60%;
+    max-width: 800px;
+    margin: 0 auto 3rem auto;
     gap: 1rem;
     align-items: center;
 }
 
+.glass-input {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    padding: 0.8rem 1.2rem !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem;
+    width: 100%;
+    display: block;
+    transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+    border-color: var(--accent-color) !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
 .search-wrapper {
-    position: relative;
     display: flex;
     align-items: center;
 }
 
-.search-icon {
-    position: absolute;
-    left: 1rem;
-    color: var(--text-secondary);
-    pointer-events: none;
-}
-
-.search-input {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-color);
-    color: white;
-    padding: 0.8rem 1rem 0.8rem 2.8rem;
-    border-radius: 12px;
-    width: 320px;
-    outline: none;
-    font-size: 0.95rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.search-input:focus {
-    border-color: var(--accent-color);
-    background: rgba(0, 0, 0, 0.6);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-    width: 380px;
-}
-
 .toggle-group {
     background: rgba(255, 255, 255, 0.05);
-    padding: 6px;
+    padding: 4px;
     border-radius: 12px;
     display: flex;
-    gap: 6px;
+    gap: 4px;
     border: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .icon-toggle {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border-radius: 8px;
     cursor: pointer;
     display: flex;
@@ -258,7 +253,7 @@ header {
 .icon-toggle.active {
     color: white;
     background: var(--accent-color);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
 }
 
 .icon-toggle svg {
@@ -284,9 +279,7 @@ header {
 }
 
 .book-grid.list-mode .book-cover {
-    width: 50px;
-    height: 75px;
-    margin-bottom: 0;
+    display: none;
 }
 
 .book-grid.list-mode .book-title {
