@@ -142,7 +142,11 @@ function renderGrid(container, books, isRec = false) {
         const card = document.createElement('div');
         card.className = 'book-card';
         
-        let cover = b.cover_url || 'https://via.placeholder.com/300x450/1e293b/94a3b8?text=No+Cover';
+        let placeholderSVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"><rect width="300" height="450" fill="%231e293b"/><text x="50%25" y="50%25" fill="%2394a3b8" font-family="sans-serif" font-size="24" text-anchor="middle" dy=".3em">No Cover</text></svg>`;
+        let cover = b.cover_url || placeholderSVG;
+        if (cover.startsWith('http://')) {
+            cover = cover.replace('http://', 'https://');
+        }
         
         // Stars
         let stars = isRec ? b.global_rating : b.rating;

@@ -137,6 +137,38 @@ int main() {
         res.set_content(b.toJson().dump(), "application/json");
     });
 
+    // 7. POST /api/recommendations/mood
+    svr.Post("/api/recommendations/mood", [&](const httplib::Request& req, httplib::Response& res) {
+        setCorsHeaders(res);
+        try {
+            auto j = nlohmann::json::parse(req.body);
+            std::string moodQuery = j.value("mood", "");
+            
+            // Get user's current ToRead/ToBuy library 
+            auto allBooks = repo.getAll();
+            nlohmann::json librarySubset = nlohmann::json::array();
+            for (const auto& b : allBooks) {
+                if (b.status == "ToRead" || b.status == "ToBuy") {
+                    librarySubset.push_back({
+                        {"title", b.title},
+                        {"author", b.author},
+                        {"genre", b.genre},
+                        {"status", b.status},
+                        {"notes", b.notes}
+                    });
+                }
+            }
+
+            // Call to NLM 
+            std::string nlmResponse = ExternalApi::promptNLM(moodQuery, librarySubset);
+            res.set_content(nlmResponse, "application/json");
+
+        } catch (...) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Invalid request format\"}", "application/json");
+        }
+    });
+
     std::cout << "Starting server on http://localhost:8080...\n";
     svr.listen("0.0.0.0", 8080);
     return 0;

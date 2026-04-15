@@ -69,4 +69,67 @@ public:
             std::cerr << "Failed to fetch external info: " << e.what() << "\n";
         }
     }
+
+    static std::string promptNLM(const std::string& moodQuery, const nlohmann::json& libraryBooks) {
+        const char* apiKeyRaw = std::getenv("GEMINI_API_KEY");
+        if (!apiKeyRaw) {
+            return "{\"error\": \"GEMINI_API_KEY environment variable is not set. Cannot use NLM features.\"}";
+        }
+        std::string apiKey = apiKeyRaw;
+
+        nlohmann::json geminiPayload;
+        geminiPayload["contents"] = nlohmann::json::array({
+            {
+                {"role", "user"},
+                {"parts", nlohmann::json::array({
+                    {{"text", "You are a personal librarian. The user has this local library data:\n" + libraryBooks.dump() + "\n\nThe user wants a book recommendation based on this mood: '" + moodQuery + "'. Evaluate their library, specifically their ToBuy/ToRead lists, and also recommend an external book not in their library. Format your response strictly as JSON with this schema: { \"local_match\": { \"title\": \"...\", \"reason\": \"...\" }, \"external_match\": { \"title\": \"...\", \"author\": \"...\", \"genre\": \"...\", \"reason\": \"...\" } }"}}
+                })}
+            }
+        });
+        geminiPayload["generationConfig"] = {
+            {"response_mime_type", "application/json"}
+        };
+
+        std::string payloadStr = geminiPayload.dump();
+        // Since payload can contain quotes and newlines, write payload to a temporary file, then curl it.
+        std::string tmpFile = "/tmp/gemini_payload_" + std::to_string(rand()) + ".json";
+        
+        {   // Safely write to tmp file
+            FILE* f = fopen(tmpFile.c_str(), "w");
+            if (f) {
+                fputs(payloadStr.c_str(), f);
+                fclose(f);
+            } else {
+                return "{\"error\": \"Failed to create temporary payload file\"}";
+            }
+        }
+
+        std::string cmd = "curl -s -X POST -H \"Content-Type: application/json\" -d @" + tmpFile + " \"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" + apiKey + "\"";
+        
+        std::string result;
+        try {
+            result = execCommand(cmd.c_str());
+        } catch(...) {
+            result = "{\"error\": \"cURL execution failed\"}";
+        }
+
+        // Cleanup temp file
+        remove(tmpFile.c_str());
+        
+        // Extract inner JSON from Gemini payload
+        try {
+            auto j = nlohmann::json::parse(result);
+            if (j.contains("candidates") && !j["candidates"].empty()) {
+                std::string innerText = j["candidates"][0]["content"]["parts"][0]["text"].get<std::string>();
+                return innerText; // This should be our formatted JSON schema
+            }
+            if (j.contains("error")) {
+                return j.dump();
+            }
+        } catch (...) {
+            // Ignore parse errors on extraction, just return raw string
+        }
+
+        return "{\"error\": \"Failed to parse Gemini response\"}";
+    }
 };
