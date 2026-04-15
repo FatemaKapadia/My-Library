@@ -64,6 +64,21 @@ public:
                 if (book.cover_url.empty() && volumeInfo.contains("imageLinks") && volumeInfo["imageLinks"].contains("thumbnail")) {
                     book.cover_url = volumeInfo["imageLinks"]["thumbnail"].get<std::string>();
                 }
+            } else {
+                // FALLBACK: Google failed, try OpenLibrary
+                std::string olQuery = urlEncode(book.title + (book.author.empty() ? "" : " " + book.author));
+                std::string olCmd = "curl -s \"https://openlibrary.org/search.json?q=" + olQuery + "&limit=1\"";
+                std::string olResponse = execCommand(olCmd.c_str());
+                auto olJ = nlohmann::json::parse(olResponse);
+                if (olJ.contains("docs") && !olJ["docs"].empty()) {
+                    auto doc = olJ["docs"][0];
+                    if (book.genre.empty() && doc.contains("subject") && !doc["subject"].empty()) {
+                        book.genre = doc["subject"][0].get<std::string>();
+                    }
+                    if (book.cover_url.empty() && doc.contains("cover_i")) {
+                        book.cover_url = "https://covers.openlibrary.org/b/id/" + std::to_string(doc["cover_i"].get<int>()) + "-L.jpg";
+                    }
+                }
             }
         } catch (const std::exception& e) {
             std::cerr << "Failed to fetch external info: " << e.what() << "\n";

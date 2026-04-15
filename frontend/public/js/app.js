@@ -3,6 +3,8 @@ const API_URL = 'http://localhost:8080/api';
 // State
 let allBooks = [];
 let recommendations = [];
+let librarySearchQuery = '';
+let libraryViewMode = 'grid';
 
 // DOM Elements
 const views = document.querySelectorAll('.view');
@@ -98,6 +100,37 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.disabled = false;
         }
     });
+
+    // Library Controls
+    const searchInput = document.getElementById('library-search');
+    const gridBtn = document.getElementById('view-grid');
+    const listBtn = document.getElementById('view-list');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            librarySearchQuery = e.target.value.toLowerCase();
+            updateUI();
+        });
+    }
+
+    if (gridBtn && listBtn) {
+        gridBtn.addEventListener('click', () => {
+            libraryViewMode = 'grid';
+            gridBtn.classList.add('active');
+            listBtn.classList.remove('active');
+            libraryGrid.classList.add('grid-mode');
+            libraryGrid.classList.remove('list-mode');
+            updateUI();
+        });
+        listBtn.addEventListener('click', () => {
+            libraryViewMode = 'list';
+            listBtn.classList.add('active');
+            gridBtn.classList.remove('active');
+            libraryGrid.classList.add('list-mode');
+            libraryGrid.classList.remove('grid-mode');
+            updateUI();
+        });
+    }
 });
 
 async function fetchBooks() {
@@ -178,7 +211,15 @@ function updateUI() {
     statLent.innerText = allBooks.filter(b => b.lent_status !== 'None').length;
 
     // Filters
-    const owned = allBooks.filter(b => b.status === 'Owned');
+    let owned = allBooks.filter(b => b.status === 'Owned');
+    if (librarySearchQuery) {
+        owned = owned.filter(b => 
+            b.title.toLowerCase().includes(librarySearchQuery) || 
+            b.author.toLowerCase().includes(librarySearchQuery) ||
+            (b.genre && b.genre.toLowerCase().includes(librarySearchQuery))
+        );
+    }
+
     const wishlist = allBooks.filter(b => b.status === 'ToBuy' || b.status === 'ToRead');
     const ledger = allBooks.filter(b => b.lent_status !== 'None');
 
