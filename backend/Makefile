@@ -16,3 +16,8 @@ $(TARGET): $(SRCS)
 
 clean:
 	rm -rf $(BIN_DIR)
+
+run: all
+	./$(TARGET)
+
+.PHONY: all clean run
