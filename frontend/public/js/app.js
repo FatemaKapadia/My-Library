@@ -120,6 +120,57 @@ async function fetchRecommendations() {
     }
 }
 
+// AI Feature
+const moodBtn = document.getElementById('mood-btn');
+const moodInput = document.getElementById('mood-input');
+const aiContainer = document.getElementById('ai-response-container');
+
+if (moodBtn) {
+    moodBtn.addEventListener('click', async () => {
+        let q = moodInput.value.trim();
+        if(!q) return;
+
+        moodBtn.innerText = 'Thinking... 🤖';
+        moodBtn.disabled = true;
+        aiContainer.style.display = 'block';
+        aiContainer.innerHTML = '<em>Consulting local library and external global records...</em>';
+
+        try {
+            const res = await fetch(`${API_URL}/recommendations/mood`, {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mood: q })
+            });
+            const data = await res.json();
+            
+            if (data.error) {
+                aiContainer.innerHTML = `<span style="color:#fca5a5;">Server AI Error: ${data.error}</span><br><small>Did you export GEMINI_API_KEY on the C++ server?</small>`;
+            } else {
+                aiContainer.innerHTML = `
+                    <div style="display:flex; gap: 2rem;">
+                        <div style="flex: 1;">
+                            <h4 style="color:var(--accent-color); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">🏠 Best Match from your Backlog</h4>
+                            <strong>${data.local_match.title}</strong>
+                            <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.3rem;">${data.local_match.reason}</p>
+                        </div>
+                        <div style="border-left:1px solid rgba(255,255,255,0.1); margin:0 1rem;"></div>
+                        <div style="flex: 1;">
+                            <h4 style="color:#a78bfa; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">🌍 New External Discovery</h4>
+                            <strong>${data.external_match.title}</strong> by ${data.external_match.author} <small>[${data.external_match.genre}]</small>
+                            <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.3rem;">${data.external_match.reason}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        } catch(err) {
+            aiContainer.innerHTML = '<em>Failed to reach AI endpoint.</em>';
+        } finally {
+            moodBtn.innerText = 'Ask Librarian';
+            moodBtn.disabled = false;
+        }
+    });
+}
+
 function updateUI() {
     // Stats
     statTotal.innerText = allBooks.filter(b => b.status === 'Owned').length;

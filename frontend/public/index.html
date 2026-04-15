@@ -63,6 +63,15 @@
                     <h3>Wishlist (To Read / To Buy)</h3>
                     <div class="book-grid" id="wishlist-grid"></div>
 
+                    <h3 class="margin-top">✨ AI Mood Librarian & Stack Ranker</h3>
+                    <div style="margin-top: 1rem; margin-bottom: 2rem;">
+                        <input type="text" id="mood-input" placeholder="e.g. 'I'm in the mood for a dark, suspenseful sci-fi thriller'" style="width: 60%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.3); color: white;">
+                        <button id="mood-btn" class="primary-btn" style="margin-left: 1rem;">Ask Librarian</button>
+                    </div>
+                    <div id="ai-response-container" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid var(--accent-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                        <!-- Content dynamically populated by JS -->
+                    </div>
+
                     <h3 class="margin-top">✨ Recommended Buy Matches (Top Rated)</h3>
                     <div class="book-grid" id="recommendation-grid"></div>
                 </section>
@@ -131,6 +140,6 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=2"></script>
+    <script src="js/app.js?v=3"></script>
 </body>
 </html>
