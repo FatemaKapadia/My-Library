@@ -8,16 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 
-# Include directories
-include_directories(include)
-
-# Source files
-set(SOURCES
-    src/main.cpp
-)
-
 # Executable
-add_executable(server ${SOURCES})
+add_executable(server src/main.cpp)
+
+# Include directories
+target_include_directories(server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Link libraries
 target_link_libraries(server
@@ -25,7 +20,7 @@ target_link_libraries(server
     CURL::libcurl
 )
 
-# Output directory
+# Output directory: Put the server in a consistent 'bin' folder at the build root
 set_target_properties(server PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )

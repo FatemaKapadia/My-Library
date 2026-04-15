@@ -16,12 +16,13 @@ $(TARGET): $(SRCS)
 
 clean:
 	rm -rf $(BIN_DIR)
+	rm -rf build
 
 run: all
 	./$(TARGET)
 
 cmake-run:
-	@mkdir -p build && cd build && /Applications/CMake.app/Contents/bin/cmake .. && make
-	./$(TARGET)
+	@mkdir -p build && cd build && cmake .. && make
+	./build/bin/server
 
 .PHONY: all clean run cmake-run
