@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include "json.hpp"
+#include "Logger.h"
 #include "Book.h"
 #include <memory>
 #include <array>
@@ -119,12 +120,14 @@ public:
             }
         }
 
-        std::string cmd = "curl -s -X POST -H \"Content-Type: application/json\" -d @" + tmpFile + " \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey + "\"";
+        std::string cmd = "curl -s -X POST -H \"Content-Type: application/json\" -d @" + tmpFile + " \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey + "\"";
         
+        LOG_INFO("Attempting AI match with Gemini 2.5-Flash...");
         std::string result;
         try {
             result = execCommand(cmd.c_str());
         } catch(...) {
+            LOG_ERROR("Critical failure executing cURL.");
             result = "{\"error\": \"cURL execution failed\"}";
         }
 
@@ -136,9 +139,10 @@ public:
             auto j = nlohmann::json::parse(result);
             if (j.contains("candidates") && !j["candidates"].empty()) {
                 std::string innerText = j["candidates"][0]["content"]["parts"][0]["text"].get<std::string>();
-                return innerText; // This should be our formatted JSON schema
+                return innerText; 
             }
             if (j.contains("error")) {
+                LOG_ERROR("AI API Error: " + j["error"].dump());
                 if (j["error"].contains("message")) {
                     return "{\"error\": \"" + j["error"]["message"].get<std::string>() + "\"}";
                 }

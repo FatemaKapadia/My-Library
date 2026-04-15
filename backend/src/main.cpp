@@ -1,6 +1,7 @@
 #include "httplib.h"
 #include "json.hpp"
 #include "BookManager.h"
+#include "Logger.h"
 #include <iostream>
 #include <memory>
 
@@ -11,9 +12,13 @@ void setCorsHeaders(httplib::Response& res) {
 }
 
 int main() {
+    // Initialize Logging
+    Logger::getInstance().setLogFile("server.log");
+    LOG_INFO("MyLibrary Server initializing...");
+
     const char* apiKey = std::getenv("GEMINI_API_KEY");
-    if (apiKey) std::cout << "GEMINI_API_KEY loaded, length: " << std::string(apiKey).length() << std::endl;
-    else std::cout << "GEMINI_API_KEY NOT FOUND in environment." << std::endl;
+    if (apiKey) LOG_INFO("Gemini API access verified.");
+    else LOG_WARN("GEMINI_API_KEY NOT FOUND. AI features will be disabled.");
 
     httplib::Server svr;
     
@@ -99,7 +104,7 @@ int main() {
         res.set_content(b.toJson().dump(), "application/json");
     });
 
-    std::cout << "Starting optimized server on http://localhost:8080...\n";
+    LOG_INFO("Optimized server starting on http://localhost:8080...");
     svr.listen("0.0.0.0", 8080);
     return 0;
 }
