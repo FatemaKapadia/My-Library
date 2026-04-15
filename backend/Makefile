@@ -19,10 +19,10 @@ clean:
 	rm -rf build
 
 run: all
-	./$(TARGET)
+	@if [ -f ../.env ]; then export $$(cat ../.env | xargs) && ./$(TARGET); else ./$(TARGET); fi
 
 cmake-run:
 	@mkdir -p build && cd build && cmake .. && make
-	./build/bin/server
+	@if [ -f .env ]; then export $$(cat .env | xargs) && ./build/bin/server; else ./build/bin/server; fi
 
 .PHONY: all clean run cmake-run

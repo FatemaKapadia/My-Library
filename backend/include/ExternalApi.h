@@ -119,7 +119,7 @@ public:
             }
         }
 
-        std::string cmd = "curl -s -X POST -H \"Content-Type: application/json\" -d @" + tmpFile + " \"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" + apiKey + "\"";
+        std::string cmd = "curl -s -X POST -H \"Content-Type: application/json\" -d @" + tmpFile + " \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey + "\"";
         
         std::string result;
         try {
@@ -139,6 +139,9 @@ public:
                 return innerText; // This should be our formatted JSON schema
             }
             if (j.contains("error")) {
+                if (j["error"].contains("message")) {
+                    return "{\"error\": \"" + j["error"]["message"].get<std::string>() + "\"}";
+                }
                 return j.dump();
             }
         } catch (...) {

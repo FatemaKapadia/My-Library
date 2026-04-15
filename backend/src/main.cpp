@@ -11,6 +11,10 @@ void setCorsHeaders(httplib::Response& res) {
 }
 
 int main() {
+    const char* apiKey = std::getenv("GEMINI_API_KEY");
+    if (apiKey) std::cout << "GEMINI_API_KEY loaded, length: " << std::string(apiKey).length() << std::endl;
+    else std::cout << "GEMINI_API_KEY NOT FOUND in environment." << std::endl;
+
     httplib::Server svr;
     
     // Setup Data Access Layer (Agnostic)

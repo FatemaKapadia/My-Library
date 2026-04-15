@@ -6,7 +6,7 @@ build:
 	@mkdir -p build && cd build && cmake .. && make
 
 run: build
-	./build/bin/server
+	@if [ -f .env ]; then export $$(cat .env | xargs) && ./build/bin/server; else ./build/bin/server; fi
 
 clean:
 	rm -rf build

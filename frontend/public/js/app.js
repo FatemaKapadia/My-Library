@@ -181,7 +181,8 @@ if (moodBtn) {
             const data = await res.json();
             
             if (data.error) {
-                aiContainer.innerHTML = `<span style="color:#fca5a5;">Server AI Error: ${data.error}</span><br><small>Did you export GEMINI_API_KEY on the C++ server?</small>`;
+                let msg = typeof data.error === 'object' ? (data.error.message || JSON.stringify(data.error)) : data.error;
+                aiContainer.innerHTML = `<span style="color:#fca5a5;">AI Error: ${msg}</span><br><small>Check console for technical details.</small>`;
             } else {
                 aiContainer.innerHTML = `
                     <div style="display:flex; gap: 2rem;">
