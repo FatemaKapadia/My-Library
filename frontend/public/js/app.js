@@ -184,23 +184,58 @@ if (moodBtn) {
                 let msg = typeof data.error === 'object' ? (data.error.message || JSON.stringify(data.error)) : data.error;
                 aiContainer.innerHTML = `<span style="color:#fca5a5;">AI Error: ${msg}</span><br><small>Check console for technical details.</small>`;
             } else {
+                // Clear and prepare container
                 aiContainer.innerHTML = `
-                    <div style="display:flex; gap: 2rem;">
-                        <div style="flex: 1;">
-                            <h4 style="color:var(--accent-color); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">🏠 Best Match from your Backlog</h4>
-                            <strong>${data.local_match.title}</strong>
-                            <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.3rem;">${data.local_match.reason}</p>
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color:var(--accent-color); margin-bottom:0.8rem; display:flex; align-items:center; gap:0.5rem;">🏠 From your Backlog</h4>
+                        <div style="background: rgba(255,255,255,0.03); padding: 1.2rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                            <strong style="font-size: 1.1rem;">${data.local_match.title}</strong>
+                            <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.4rem;">${data.local_match.reason}</p>
                         </div>
-                        <div style="border-left:1px solid rgba(255,255,255,0.1); margin:0 1rem;"></div>
-                        <div style="flex: 1;">
-                            <h4 style="color:#a78bfa; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">🌍 New External Discovery</h4>
-                            <strong>${data.external_match.title}</strong> by ${data.external_match.author} <small>[${data.external_match.genre}]</small>
-                            <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.3rem;">${data.external_match.reason}</p>
+                    </div>
+                    <div>
+                        <h4 style="color:#a78bfa; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">🌍 Global Recommendations</h4>
+                        <div id="external-recs-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                            <!-- Dynamic cards will pop in here -->
+                             <div class="loading-shimmer" style="height: 100px; grid-column: 1/-1;">Fetching global metadata...</div>
                         </div>
                     </div>
                 `;
+
+                const recsList = document.getElementById('external-recs-list');
+                recsList.innerHTML = ''; // Clear shimmer
+
+                if (data.external_matches && data.external_matches.length > 0) {
+                    for (const match of data.external_matches) {
+                        const cardId = `rec-${Math.random().toString(36).substr(2, 9)}`;
+                        recsList.innerHTML += `
+                            <div id="${cardId}" style="background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-color); display: flex; overflow: hidden; height: 140px; transition: all 0.3s ease;">
+                                <div class="shimmer" style="width: 90px; height: 100%; background: rgba(255,255,255,0.05);"></div>
+                                <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div>
+                                        <div style="font-weight: 600; line-height: 1.2;">${match.title}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">by ${match.author}</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${match.reason}</div>
+                                    </div>
+                                    <button class="primary-btn" style="padding: 4px 8px; font-size: 0.7rem; align-self: flex-start; margin-top: 5px;">Add to Wishlist</button>
+                                </div>
+                            </div>
+                        `;
+
+                        // Fetch real metadata in background
+                        fetch(`/api/external/search?q=${encodeURIComponent(match.title + ' ' + match.author)}`)
+                            .then(r => r.json())
+                            .then(fullBook => {
+                                const card = document.getElementById(cardId);
+                                if (card && fullBook.cover_url) {
+                                    card.querySelector('.shimmer').outerHTML = `<img src="${fullBook.cover_url}" style="width: 90px; height: 100%; object-fit: cover; border-right: 1px solid var(--border-color);">`;
+                                }
+                            });
+                    }
+                }
             }
         } catch(err) {
+            console.error(err);
             aiContainer.innerHTML = '<em>Failed to reach AI endpoint.</em>';
         } finally {
             moodBtn.innerText = 'Ask Librarian';

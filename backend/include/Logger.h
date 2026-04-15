@@ -6,6 +6,7 @@
 #include <mutex>
 #include <ctime>
 #include <iomanip>
+#include <sstream>
 
 enum class LogLevel {
     DEBUG,
