@@ -20,10 +20,7 @@ const wishlistGrid = document.getElementById('wishlist-grid');
 const recGrid = document.getElementById('recommendation-grid');
 const ledgerGrid = document.getElementById('ledger-grid');
 
-// Stats
-const statTotal = document.getElementById('stat-total');
-const statToRead = document.getElementById('stat-toread');
-const statLent = document.getElementById('stat-lent');
+// Stats removal... (no longer needed)
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -212,11 +209,6 @@ if (moodBtn) {
 }
 
 function updateUI() {
-    // Stats
-    statTotal.innerText = allBooks.filter(b => b.status === 'Owned').length;
-    statToRead.innerText = allBooks.filter(b => b.status === 'ToRead').length;
-    statLent.innerText = allBooks.filter(b => b.lent_status !== 'None').length;
-
     // Filters
     let owned = allBooks.filter(b => b.status === 'Owned');
     if (librarySearchQuery) {
