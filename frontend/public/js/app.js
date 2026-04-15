@@ -57,6 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('visible');
     });
 
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('visible');
+        }
+    });
+
     // Handle Form Submit
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -262,13 +269,9 @@ function renderGrid(container, books, isRec = false) {
             ${ledgerHtml}
         `;
         
-        // Edit functionality (not on rec grid)
+        // Open modal on card click (not on rec grid)
         if(!isRec) {
-            const editBtn = document.createElement('button');
-            editBtn.innerText = 'Edit';
-            editBtn.style = 'margin-top: 10px; background: rgba(255,255,255,0.1); border:none; color: white; padding: 5px; cursor: pointer; border-radius: 4px;';
-            editBtn.onclick = () => openEditModal(b);
-            card.appendChild(editBtn);
+            card.onclick = () => openEditModal(b);
         }
 
         container.appendChild(card);

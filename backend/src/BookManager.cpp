@@ -32,9 +32,25 @@ Book BookManager::addBook(Book book) {
     return book;
 }
 
-void BookManager::updateBook(const std::string& id, Book book) {
-    book.id = id;
-    repo->update(book);
+void BookManager::updateBook(const std::string& id, Book newBook) {
+    auto books = repo->getAll();
+    for (const auto& b : books) {
+        if (b.id == id) {
+            Book updated = b; // Start with existing data (includes cover_url, etc.)
+            updated.title = newBook.title;
+            updated.author = newBook.author;
+            updated.genre = newBook.genre;
+            updated.status = newBook.status;
+            updated.rating = newBook.rating;
+            updated.lent_status = newBook.lent_status;
+            updated.person_name = newBook.person_name;
+            updated.date = newBook.date;
+            updated.notes = newBook.notes;
+            
+            repo->update(updated);
+            return;
+        }
+    }
 }
 
 bool BookManager::deleteBook(const std::string& id) {
