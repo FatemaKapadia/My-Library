@@ -1,12 +1,12 @@
 CXX = clang++
-CXXFLAGS = -std=c++11 -Wall -Wextra -pthread -O2
+CXXFLAGS = -std=c++14 -Wall -Wextra -pthread -O2
 
 SRC_DIR = src
 BIN_DIR = bin
 
 TARGET = $(BIN_DIR)/server
 
-SRCS = $(SRC_DIR)/main.cpp
+SRCS = $(SRC_DIR)/main.cpp $(SRC_DIR)/BookManager.cpp
 
 all: $(TARGET)
 

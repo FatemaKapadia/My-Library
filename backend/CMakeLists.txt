@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(MyLibraryBackend)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find required packages
@@ -9,7 +9,10 @@ find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 
 # Executable
-add_executable(server src/main.cpp)
+add_executable(server 
+    src/main.cpp 
+    src/BookManager.cpp
+)
 
 # Include directories
 target_include_directories(server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
