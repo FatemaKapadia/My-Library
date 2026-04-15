@@ -20,4 +20,8 @@ clean:
 run: all
 	./$(TARGET)
 
-.PHONY: all clean run
+cmake-run:
+	@mkdir -p build && cd build && /Applications/CMake.app/Contents/bin/cmake .. && make
+	./$(TARGET)
+
+.PHONY: all clean run cmake-run
