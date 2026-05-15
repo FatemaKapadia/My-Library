@@ -98,7 +98,7 @@ public:
             {
                 {"role", "user"},
                 {"parts", nlohmann::json::array({
-                    {{"text", "You are a personal librarian. The user has this local library data:\n" + libraryBooks.dump() + "\n\nThe user wants a book recommendation based on this mood or query: '" + moodQuery + "'. \n\n1. Evaluate their library (specifically ToBuy/ToRead lists) for a 'local_match'.\n2. Provide up to 5 'external_matches' from the global world of books that fit the query but are NOT in their library.\n\nFormat your response strictly as JSON with this schema:\n{\n  \"local_match\": { \"title\": \"...\", \"reason\": \"...\" },\n  \"external_matches\": [\n    { \"title\": \"...\", \"author\": \"...\", \"reason\": \"...\" }\n  ]\n}"}}
+                    {{"text", "You are a personal librarian. The user has this local library data:\n" + libraryBooks.dump() + "\n\nThe user wants a book recommendation based on this mood or query: '" + moodQuery + "'. \n\n1. Evaluate their library (specifically ToBuy/ToRead lists) for a 'local_match'.\n2. Provide STRICTLY UP TO 5 'external_matches' from the global world of books that fit the query but are NOT in their library.\n\nFormat your response strictly as JSON with this schema:\n{\n  \"local_match\": { \"title\": \"...\", \"reason\": \"...\" },\n  \"external_matches\": [\n    { \"title\": \"...\", \"author\": \"...\", \"reason\": \"...\" }\n  ]\n}"}}
                 })}
             }
         });

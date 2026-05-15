@@ -206,7 +206,8 @@ if (moodBtn) {
                 recsList.innerHTML = ''; // Clear shimmer
 
                 if (data.external_matches && data.external_matches.length > 0) {
-                    for (const match of data.external_matches) {
+                    const topMatches = data.external_matches.slice(0, 5);
+                    for (const match of topMatches) {
                         const cardId = `rec-${Math.random().toString(36).substr(2, 9)}`;
                         recsList.innerHTML += `
                             <div id="${cardId}" style="background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border-color); display: flex; overflow: hidden; height: 140px; transition: all 0.3s ease;">
