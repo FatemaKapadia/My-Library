@@ -1,22 +1,17 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <mutex>
 #include <ctime>
+#include <fstream>
 #include <iomanip>
+#include <iostream>
+#include <mutex>
 #include <sstream>
+#include <string>
 
-enum class LogLevel {
-    DEBUG,
-    INFO,
-    WARN,
-    ERROR
-};
+enum class LogLevel { DEBUG, INFO, WARN, ERROR };
 
 class Logger {
-public:
+   public:
     static Logger& getInstance() {
         static Logger instance;
         return instance;
@@ -30,10 +25,10 @@ public:
 
     void log(LogLevel level, std::string_view message) {
         std::lock_guard<std::mutex> lock(mtx);
-        
+
         std::string_view levelStr = levelToString(level);
         std::string timestamp = getTimestamp();
-        
+
         std::string formatted = "[" + timestamp + "] [" + std::string(levelStr) + "] " + std::string(message);
 
         // Print to Console (with color)
@@ -45,32 +40,42 @@ public:
         }
     }
 
-private:
+   private:
     Logger() = default;
     ~Logger() {
         if (logFile.is_open()) logFile.close();
     }
-    
+
     std::ofstream logFile;
     std::mutex mtx;
 
     std::string_view levelToString(LogLevel level) {
         switch (level) {
-            case LogLevel::DEBUG: return "DEBUG";
-            case LogLevel::INFO:  return "INFO";
-            case LogLevel::WARN:  return "WARN";
-            case LogLevel::ERROR: return "ERROR";
-            default: return "UNKNOWN";
+            case LogLevel::DEBUG:
+                return "DEBUG";
+            case LogLevel::INFO:
+                return "INFO";
+            case LogLevel::WARN:
+                return "WARN";
+            case LogLevel::ERROR:
+                return "ERROR";
+            default:
+                return "UNKNOWN";
         }
     }
 
     std::string_view getColor(LogLevel level) {
         switch (level) {
-            case LogLevel::DEBUG: return "\033[36m"; // Cyan
-            case LogLevel::INFO:  return "\033[32m"; // Green
-            case LogLevel::WARN:  return "\033[33m"; // Yellow
-            case LogLevel::ERROR: return "\033[31m"; // Red
-            default: return "\033[0m";
+            case LogLevel::DEBUG:
+                return "\033[36m";  // Cyan
+            case LogLevel::INFO:
+                return "\033[32m";  // Green
+            case LogLevel::WARN:
+                return "\033[33m";  // Yellow
+            case LogLevel::ERROR:
+                return "\033[31m";  // Red
+            default:
+                return "\033[0m";
         }
     }
 
@@ -85,6 +90,6 @@ private:
 
 // Global Helper Macros
 #define LOG_DEBUG(msg) Logger::getInstance().log(LogLevel::DEBUG, msg)
-#define LOG_INFO(msg)  Logger::getInstance().log(LogLevel::INFO, msg)
-#define LOG_WARN(msg)  Logger::getInstance().log(LogLevel::WARN, msg)
+#define LOG_INFO(msg) Logger::getInstance().log(LogLevel::INFO, msg)
+#define LOG_WARN(msg) Logger::getInstance().log(LogLevel::WARN, msg)
 #define LOG_ERROR(msg) Logger::getInstance().log(LogLevel::ERROR, msg)

@@ -25,7 +25,7 @@ const ledgerGrid = document.getElementById('ledger-grid');
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     fetchBooks();
-    
+
     // Navigation
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('active');
             document.getElementById(`${targetView}-view`).classList.add('active');
 
-            if(targetView === 'wishlist') {
+            if (targetView === 'wishlist') {
                 fetchRecommendations();
             }
         });
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Form Submit
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const btn = form.querySelector('.submit-btn');
         btn.innerText = 'Saving & Fetching info...';
         btn.disabled = true;
@@ -142,7 +142,7 @@ async function fetchBooks() {
         const res = await fetch(`${API_URL}/books`);
         allBooks = await res.json();
         updateUI();
-    } catch(err) {
+    } catch (err) {
         console.error("Server not reachable", err);
     }
 }
@@ -152,7 +152,7 @@ async function fetchRecommendations() {
         const res = await fetch(`${API_URL}/recommendations`);
         recommendations = await res.json();
         renderGrid(recGrid, recommendations, true);
-    } catch(err) {
+    } catch (err) {
         console.error(err);
     }
 }
@@ -165,7 +165,7 @@ const aiContainer = document.getElementById('ai-response-container');
 if (moodBtn) {
     moodBtn.addEventListener('click', async () => {
         let q = moodInput.value.trim();
-        if(!q) return;
+        if (!q) return;
 
         moodBtn.innerText = 'Thinking... 🤖';
         moodBtn.disabled = true;
@@ -175,11 +175,15 @@ if (moodBtn) {
         try {
             const res = await fetch(`${API_URL}/recommendations/mood`, {
                 method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ mood: q })
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    mood: q
+                })
             });
             const data = await res.json();
-            
+
             if (data.error) {
                 let msg = typeof data.error === 'object' ? (data.error.message || JSON.stringify(data.error)) : data.error;
                 aiContainer.innerHTML = `<span style="color:#fca5a5;">AI Error: ${msg}</span><br><small>Check console for technical details.</small>`;
@@ -235,7 +239,7 @@ if (moodBtn) {
                     }
                 }
             }
-        } catch(err) {
+        } catch (err) {
             console.error(err);
             aiContainer.innerHTML = '<em>Failed to reach AI endpoint.</em>';
         } finally {
@@ -249,8 +253,8 @@ function updateUI() {
     // Filters
     let owned = allBooks.filter(b => b.status === 'Owned');
     if (librarySearchQuery) {
-        owned = owned.filter(b => 
-            b.title.toLowerCase().includes(librarySearchQuery) || 
+        owned = owned.filter(b =>
+            b.title.toLowerCase().includes(librarySearchQuery) ||
             b.author.toLowerCase().includes(librarySearchQuery) ||
             (b.genre && b.genre.toLowerCase().includes(librarySearchQuery))
         );
@@ -269,17 +273,17 @@ function renderGrid(container, books, isRec = false) {
     books.forEach(b => {
         const card = document.createElement('div');
         card.className = 'book-card';
-        
+
         let placeholderSVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"><rect width="300" height="450" fill="%231e293b"/><text x="50%25" y="50%25" fill="%2394a3b8" font-family="sans-serif" font-size="24" text-anchor="middle" dy=".3em">No Cover</text></svg>`;
         let cover = b.cover_url || placeholderSVG;
         if (cover.startsWith('http://')) {
             cover = cover.replace('http://', 'https://');
         }
-        
+
         // Stars
         let stars = isRec ? b.global_rating : b.rating;
         let badgeText = isRec ? `⭐ ${stars} (Global)` : `⭐ ${stars}`;
-        
+
         // Ledger extra info
         let ledgerHtml = '';
         if (b.lent_status !== 'None') {
@@ -297,9 +301,9 @@ function renderGrid(container, books, isRec = false) {
             <div class="book-genre">${b.genre || 'Uncategorized'}</div>
             ${ledgerHtml}
         `;
-        
+
         // Open modal on card click (not on rec grid)
-        if(!isRec) {
+        if (!isRec) {
             card.onclick = () => openEditModal(b);
         }
 
@@ -319,6 +323,6 @@ function openEditModal(b) {
     document.getElementById('book-person').value = b.person_name || '';
     document.getElementById('book-date').value = b.date || '';
     document.getElementById('book-notes').value = b.notes || '';
-    
+
     modal.classList.add('visible');
 }

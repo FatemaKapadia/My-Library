@@ -1,14 +1,14 @@
 #pragma once
 
 #include <Book.h>
-#include <fstream>
-#include <vector>
-#include <mutex>
+
 #include <algorithm>
-#include <iostream>
+#include <fstream>
+#include <mutex>
+#include <vector>
 
 class IBookRepository {
-public:
+   public:
     virtual ~IBookRepository() = default;
     virtual std::vector<Book> getAll() = 0;
     virtual void save(const Book& book) = 0;
@@ -17,7 +17,7 @@ public:
 };
 
 class JsonBookRepository : public IBookRepository {
-private:
+   private:
     std::string filepath;
     std::mutex mtx;
 
@@ -50,7 +50,7 @@ private:
         }
     }
 
-public:
+   public:
     JsonBookRepository(const std::string& path) : filepath(path) {}
 
     std::vector<Book> getAll() override {
@@ -68,7 +68,7 @@ public:
     void update(const Book& book) override {
         std::lock_guard<std::mutex> lock(mtx);
         auto books = readAll();
-        if (auto it = std::ranges::find_if(books, [&](const Book& b){ return b.id == book.id; }); it != books.end()) {
+        if (auto it = std::ranges::find_if(books, [&](const Book& b) { return b.id == book.id; }); it != books.end()) {
             *it = book;
             writeAll(books);
         }
@@ -77,7 +77,7 @@ public:
     bool remove(const std::string& id) override {
         std::lock_guard<std::mutex> lock(mtx);
         auto books = readAll();
-        if (auto erased = std::erase_if(books, [&](const Book& b){ return b.id == id; }); erased > 0) {
+        if (auto erased = std::erase_if(books, [&](const Book& b) { return b.id == id; }); erased > 0) {
             writeAll(books);
             return true;
         }

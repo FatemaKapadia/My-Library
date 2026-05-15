@@ -2,18 +2,17 @@
 
 #include <Book.h>
 #include <BookRepository.h>
-#include <ExternalApi.h>
-#include <uuid/uuid.h>
+
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 class BookManager {
-private:
+   private:
     std::unique_ptr<IBookRepository> repo;
     std::string generateId();
 
-public:
+   public:
     BookManager(std::unique_ptr<IBookRepository> repository);
 
     std::vector<Book> getBooks(std::string_view statusFilter = "", std::string_view genreFilter = "");

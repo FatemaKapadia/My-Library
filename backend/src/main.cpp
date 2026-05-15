@@ -1,8 +1,9 @@
-#include <httplib.h>
-#include <json.hpp>
 #include <BookManager.h>
 #include <Logger.h>
-#include <iostream>
+#include <httplib.h>
+
+#include <cstdlib>
+#include <json.hpp>
 #include <memory>
 
 void setCorsHeaders(httplib::Response& res) {
@@ -17,11 +18,13 @@ int main() {
     LOG_INFO("MyLibrary Server initializing...");
 
     const char* apiKey = std::getenv("GEMINI_API_KEY");
-    if (apiKey) LOG_INFO("Gemini API access verified.");
-    else LOG_WARN("GEMINI_API_KEY NOT FOUND. AI features will be disabled.");
+    if (apiKey)
+        LOG_INFO("Gemini API access verified.");
+    else
+        LOG_WARN("GEMINI_API_KEY NOT FOUND. AI features will be disabled.");
 
     httplib::Server svr;
-    
+
     // Setup Data Access Layer (Agnostic)
     auto repository = std::make_unique<JsonBookRepository>("backend/data/database.json");
     BookManager manager(std::move(repository));
@@ -30,9 +33,7 @@ int main() {
     svr.set_mount_point("/", "frontend/public");
 
     // CORS Middleware
-    svr.Options(R"(.*)", [](const httplib::Request&, httplib::Response& res) {
-        setCorsHeaders(res);
-    });
+    svr.Options(R"(.*)", [](const httplib::Request&, httplib::Response& res) { setCorsHeaders(res); });
 
     // --- API ROUTES ---
 
@@ -41,7 +42,7 @@ int main() {
         setCorsHeaders(res);
         std::string status = req.get_param_value("status");
         std::string genre = req.get_param_value("genre");
-        
+
         auto books = manager.getBooks(status, genre);
         nlohmann::json j = nlohmann::json::array();
         for (const auto& b : books) j.push_back(b.toJson());
@@ -73,8 +74,10 @@ int main() {
     // Delete Book
     svr.Delete(R"(/api/books/([^/]+))", [&](const httplib::Request& req, httplib::Response& res) {
         setCorsHeaders(res);
-        if (manager.deleteBook(req.matches[1].str())) res.status = 200;
-        else res.status = 404;
+        if (manager.deleteBook(req.matches[1].str()))
+            res.status = 200;
+        else
+            res.status = 404;
     });
 
     // Recommendations

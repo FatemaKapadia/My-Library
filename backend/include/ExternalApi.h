@@ -1,15 +1,16 @@
 #pragma once
 
-#include <string>
+#include <Book.h>
+#include <Logger.h>
+
+#include <array>
 #include <iostream>
 #include <json.hpp>
-#include <Logger.h>
-#include <Book.h>
 #include <memory>
-#include <array>
+#include <string>
 
 class ExternalApi {
-private:
+   private:
     static std::string execCommand(const char* cmd) {
         std::array<char, 128> buffer;
         std::string result;
@@ -39,7 +40,7 @@ private:
         return escaped;
     }
 
-public:
+   public:
     static void enrichBookData(Book& book) {
         std::string query = book.title;
         if (!book.author.empty()) {
@@ -55,14 +56,15 @@ public:
 
             if (j.contains("items") && !j["items"].empty()) {
                 auto volumeInfo = j["items"][0]["volumeInfo"];
-                
+
                 if (book.genre.empty() && volumeInfo.contains("categories") && !volumeInfo["categories"].empty()) {
                     book.genre = volumeInfo["categories"][0].get<std::string>();
                 }
                 if (volumeInfo.contains("averageRating")) {
                     book.global_rating = volumeInfo["averageRating"].get<float>();
                 }
-                if (book.cover_url.empty() && volumeInfo.contains("imageLinks") && volumeInfo["imageLinks"].contains("thumbnail")) {
+                if (book.cover_url.empty() && volumeInfo.contains("imageLinks") &&
+                    volumeInfo["imageLinks"].contains("thumbnail")) {
                     book.cover_url = volumeInfo["imageLinks"]["thumbnail"].get<std::string>();
                 }
             } else {
@@ -77,7 +79,8 @@ public:
                         book.genre = doc["subject"][0].get<std::string>();
                     }
                     if (book.cover_url.empty() && doc.contains("cover_i")) {
-                        book.cover_url = "https://covers.openlibrary.org/b/id/" + std::to_string(doc["cover_i"].get<int>()) + "-L.jpg";
+                        book.cover_url = "https://covers.openlibrary.org/b/id/" +
+                                         std::to_string(doc["cover_i"].get<int>()) + "-L.jpg";
                     }
                 }
             }
@@ -94,23 +97,27 @@ public:
         std::string apiKey = apiKeyRaw;
 
         nlohmann::json geminiPayload;
-        geminiPayload["contents"] = nlohmann::json::array({
-            {
-                {"role", "user"},
-                {"parts", nlohmann::json::array({
-                    {{"text", "You are a personal librarian. The user has this local library data:\n" + libraryBooks.dump() + "\n\nThe user wants a book recommendation based on this mood or query: '" + std::string(moodQuery) + "'. \n\n1. Evaluate their library (specifically ToBuy/ToRead lists) for a 'local_match'.\n2. Provide STRICTLY UP TO 5 'external_matches' from the global world of books that fit the query but are NOT in their library.\n\nFormat your response strictly as JSON with this schema:\n{\n  \"local_match\": { \"title\": \"...\", \"reason\": \"...\" },\n  \"external_matches\": [\n    { \"title\": \"...\", \"author\": \"...\", \"reason\": \"...\" }\n  ]\n}"}}
-                })}
-            }
-        });
-        geminiPayload["generationConfig"] = {
-            {"response_mime_type", "application/json"}
-        };
+        geminiPayload["contents"] = nlohmann::json::array(
+            {{{"role", "user"},
+              {"parts",
+               nlohmann::json::array(
+                   {{{"text", "You are a personal librarian. The user has this local library data:\n" +
+                                  libraryBooks.dump() +
+                                  "\n\nThe user wants a book recommendation based on this mood or query: '" +
+                                  std::string(moodQuery) +
+                                  "'. \n\n1. Evaluate their library (specifically ToBuy/ToRead lists) for a "
+                                  "'local_match'.\n2. Provide STRICTLY UP TO 5 'external_matches' from the global "
+                                  "world of books that fit the query but are NOT in their library.\n\nFormat your "
+                                  "response strictly as JSON with this schema:\n{\n  \"local_match\": { \"title\": "
+                                  "\"...\", \"reason\": \"...\" },\n  \"external_matches\": [\n    { \"title\": "
+                                  "\"...\", \"author\": \"...\", \"reason\": \"...\" }\n  ]\n}"}}})}}});
+        geminiPayload["generationConfig"] = {{"response_mime_type", "application/json"}};
 
         std::string payloadStr = geminiPayload.dump();
         // Since payload can contain quotes and newlines, write payload to a temporary file, then curl it.
         std::string tmpFile = "/tmp/gemini_payload_" + std::to_string(rand()) + ".json";
-        
-        {   // Safely write to tmp file
+
+        {  // Safely write to tmp file
             FILE* f = fopen(tmpFile.c_str(), "w");
             if (f) {
                 fputs(payloadStr.c_str(), f);
@@ -120,27 +127,30 @@ public:
             }
         }
 
-        std::string cmd = "curl -s -X POST -H \"Content-Type: application/json\" -d @" + tmpFile + " \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey + "\"";
-        
+        std::string cmd =
+            "curl -s -X POST -H \"Content-Type: application/json\" -d @" + tmpFile +
+            " \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+            apiKey + "\"";
+
         LOG_INFO("Attempting AI match with Gemini 2.5-Flash...");
         std::string result;
         try {
             result = execCommand(cmd.c_str());
-        } catch(...) {
+        } catch (...) {
             LOG_ERROR("Critical failure executing cURL.");
             result = "{\"error\": \"cURL execution failed\"}";
         }
 
         // Cleanup temp file
         remove(tmpFile.c_str());
-        
+
         // Extract inner JSON from Gemini payload
         try {
             auto j = nlohmann::json::parse(result);
             if (j.contains("candidates") && !j["candidates"].empty()) {
                 std::string innerText = j["candidates"][0]["content"]["parts"][0]["text"].get<std::string>();
                 LOG_DEBUG("AI Response: " + innerText);
-                return innerText; 
+                return innerText;
             }
             if (j.contains("error")) {
                 LOG_ERROR("AI API Error: " + j["error"].dump());
