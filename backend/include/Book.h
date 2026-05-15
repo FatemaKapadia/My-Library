@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "../include/json.hpp"
+#include <json.hpp>
 
 struct Book {
     std::string id;
