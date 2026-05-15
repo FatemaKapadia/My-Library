@@ -1,4 +1,6 @@
 #include "BookManager.h"
+#include <ranges>
+#include <algorithm>
 
 std::string BookManager::generateId() {
     uuid_t b;
@@ -11,18 +13,18 @@ std::string BookManager::generateId() {
 BookManager::BookManager(std::unique_ptr<IBookRepository> repository) 
     : repo(std::move(repository)) {}
 
-std::vector<Book> BookManager::getBooks(const std::string& statusFilter, const std::string& genreFilter) {
+std::vector<Book> BookManager::getBooks(std::string_view statusFilter, std::string_view genreFilter) {
     auto all = repo->getAll();
     if (statusFilter.empty() && genreFilter.empty()) return all;
 
-    std::vector<Book> filtered;
-    for (const auto& b : all) {
-        bool matches = true;
-        if (!statusFilter.empty() && b.status != statusFilter) matches = false;
-        if (!genreFilter.empty() && b.genre != genreFilter) matches = false;
-        if (matches) filtered.push_back(b);
-    }
-    return filtered;
+    auto filtered = all | std::views::filter([&](const Book& b) {
+        return (statusFilter.empty() || b.status == statusFilter) &&
+               (genreFilter.empty() || b.genre == genreFilter);
+    });
+
+    std::vector<Book> result;
+    std::ranges::copy(filtered, std::back_inserter(result));
+    return result;
 }
 
 Book BookManager::addBook(Book book) {
@@ -32,41 +34,39 @@ Book BookManager::addBook(Book book) {
     return book;
 }
 
-void BookManager::updateBook(const std::string& id, Book newBook) {
+void BookManager::updateBook(std::string_view id, Book newBook) {
     auto books = repo->getAll();
-    for (const auto& b : books) {
-        if (b.id == id) {
-            Book updated = b; // Start with existing data (includes cover_url, etc.)
-            updated.title = newBook.title;
-            updated.author = newBook.author;
-            updated.genre = newBook.genre;
-            updated.status = newBook.status;
-            updated.rating = newBook.rating;
-            updated.lent_status = newBook.lent_status;
-            updated.person_name = newBook.person_name;
-            updated.date = newBook.date;
-            updated.notes = newBook.notes;
-            
-            repo->update(updated);
-            return;
-        }
+    if (auto it = std::ranges::find_if(books, [&](const Book& b){ return b.id == id; }); it != books.end()) {
+        Book updated = *it; // Start with existing data (includes cover_url, etc.)
+        updated.title = newBook.title;
+        updated.author = newBook.author;
+        updated.genre = newBook.genre;
+        updated.status = newBook.status;
+        updated.rating = newBook.rating;
+        updated.lent_status = newBook.lent_status;
+        updated.person_name = newBook.person_name;
+        updated.date = newBook.date;
+        updated.notes = newBook.notes;
+        
+        repo->update(updated);
     }
 }
 
-bool BookManager::deleteBook(const std::string& id) {
-    return repo->remove(id);
+bool BookManager::deleteBook(std::string_view id) {
+    return repo->remove(std::string(id));
 }
 
-std::vector<Book> BookManager::getTopRecommendations(const std::string& genreFilter) {
+std::vector<Book> BookManager::getTopRecommendations(std::string_view genreFilter) {
     auto books = repo->getAll();
-    std::vector<Book> candidates;
-    for (const auto& b : books) {
-        if (b.status == "ToBuy" && (genreFilter.empty() || b.genre == genreFilter)) {
-            candidates.push_back(b);
-        }
-    }
     
-    std::sort(candidates.begin(), candidates.end(), [](const Book& a, const Book& b){
+    auto candidates_view = books | std::views::filter([&](const Book& b) {
+        return b.status == "ToBuy" && (genreFilter.empty() || b.genre == genreFilter);
+    });
+
+    std::vector<Book> candidates;
+    std::ranges::copy(candidates_view, std::back_inserter(candidates));
+    
+    std::ranges::sort(candidates, [](const Book& a, const Book& b){
         return a.global_rating > b.global_rating;
     });
 
@@ -74,7 +74,7 @@ std::vector<Book> BookManager::getTopRecommendations(const std::string& genreFil
     return candidates;
 }
 
-std::string BookManager::getMoodMatch(const std::string& moodQuery) {
+std::string BookManager::getMoodMatch(std::string_view moodQuery) {
     auto allBooks = repo->getAll();
     nlohmann::json librarySubset = nlohmann::json::array();
     for (const auto& b : allBooks) {
@@ -88,12 +88,12 @@ std::string BookManager::getMoodMatch(const std::string& moodQuery) {
             });
         }
     }
-    return ExternalApi::promptNLM(moodQuery, librarySubset);
+    return ExternalApi::promptNLM(std::string(moodQuery), librarySubset);
 }
 
-Book BookManager::searchExternal(const std::string& query) {
+Book BookManager::searchExternal(std::string_view query) {
     Book b;
-    b.title = query;
+    b.title = std::string(query);
     ExternalApi::enrichBookData(b);
     return b;
 }

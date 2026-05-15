@@ -22,19 +22,19 @@ public:
         return instance;
     }
 
-    void setLogFile(const std::string& filename) {
+    void setLogFile(std::string_view filename) {
         std::lock_guard<std::mutex> lock(mtx);
         if (logFile.is_open()) logFile.close();
-        logFile.open(filename, std::ios::app);
+        logFile.open(std::string(filename), std::ios::app);
     }
 
-    void log(LogLevel level, const std::string& message) {
+    void log(LogLevel level, std::string_view message) {
         std::lock_guard<std::mutex> lock(mtx);
         
-        std::string levelStr = levelToString(level);
+        std::string_view levelStr = levelToString(level);
         std::string timestamp = getTimestamp();
         
-        std::string formatted = "[" + timestamp + "] [" + levelStr + "] " + message;
+        std::string formatted = "[" + timestamp + "] [" + std::string(levelStr) + "] " + std::string(message);
 
         // Print to Console (with color)
         std::cout << getColor(level) << formatted << "\033[0m" << std::endl;
@@ -54,7 +54,7 @@ private:
     std::ofstream logFile;
     std::mutex mtx;
 
-    std::string levelToString(LogLevel level) {
+    std::string_view levelToString(LogLevel level) {
         switch (level) {
             case LogLevel::DEBUG: return "DEBUG";
             case LogLevel::INFO:  return "INFO";
@@ -64,7 +64,7 @@ private:
         }
     }
 
-    std::string getColor(LogLevel level) {
+    std::string_view getColor(LogLevel level) {
         switch (level) {
             case LogLevel::DEBUG: return "\033[36m"; // Cyan
             case LogLevel::INFO:  return "\033[32m"; // Green

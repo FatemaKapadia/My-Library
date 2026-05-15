@@ -23,7 +23,7 @@ private:
         return result;
     }
 
-    static std::string urlEncode(const std::string &value) {
+    static std::string urlEncode(std::string_view value) {
         std::string escaped;
         for (char c : value) {
             if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
@@ -86,7 +86,7 @@ public:
         }
     }
 
-    static std::string promptNLM(const std::string& moodQuery, const nlohmann::json& libraryBooks) {
+    static std::string promptNLM(std::string_view moodQuery, const nlohmann::json& libraryBooks) {
         const char* apiKeyRaw = std::getenv("GEMINI_API_KEY");
         if (!apiKeyRaw) {
             return "{\"error\": \"GEMINI_API_KEY environment variable is not set. Cannot use NLM features.\"}";
@@ -98,7 +98,7 @@ public:
             {
                 {"role", "user"},
                 {"parts", nlohmann::json::array({
-                    {{"text", "You are a personal librarian. The user has this local library data:\n" + libraryBooks.dump() + "\n\nThe user wants a book recommendation based on this mood or query: '" + moodQuery + "'. \n\n1. Evaluate their library (specifically ToBuy/ToRead lists) for a 'local_match'.\n2. Provide STRICTLY UP TO 5 'external_matches' from the global world of books that fit the query but are NOT in their library.\n\nFormat your response strictly as JSON with this schema:\n{\n  \"local_match\": { \"title\": \"...\", \"reason\": \"...\" },\n  \"external_matches\": [\n    { \"title\": \"...\", \"author\": \"...\", \"reason\": \"...\" }\n  ]\n}"}}
+                    {{"text", "You are a personal librarian. The user has this local library data:\n" + libraryBooks.dump() + "\n\nThe user wants a book recommendation based on this mood or query: '" + std::string(moodQuery) + "'. \n\n1. Evaluate their library (specifically ToBuy/ToRead lists) for a 'local_match'.\n2. Provide STRICTLY UP TO 5 'external_matches' from the global world of books that fit the query but are NOT in their library.\n\nFormat your response strictly as JSON with this schema:\n{\n  \"local_match\": { \"title\": \"...\", \"reason\": \"...\" },\n  \"external_matches\": [\n    { \"title\": \"...\", \"author\": \"...\", \"reason\": \"...\" }\n  ]\n}"}}
                 })}
             }
         });

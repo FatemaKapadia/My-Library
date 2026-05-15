@@ -63,7 +63,7 @@ int main() {
     svr.Put(R"(/api/books/([^/]+))", [&](const httplib::Request& req, httplib::Response& res) {
         setCorsHeaders(res);
         try {
-            manager.updateBook(req.matches[1], Book::fromJson(nlohmann::json::parse(req.body)));
+            manager.updateBook(req.matches[1].str(), Book::fromJson(nlohmann::json::parse(req.body)));
             res.status = 200;
         } catch (...) {
             res.status = 400;
@@ -73,7 +73,7 @@ int main() {
     // Delete Book
     svr.Delete(R"(/api/books/([^/]+))", [&](const httplib::Request& req, httplib::Response& res) {
         setCorsHeaders(res);
-        if (manager.deleteBook(req.matches[1])) res.status = 200;
+        if (manager.deleteBook(req.matches[1].str())) res.status = 200;
         else res.status = 404;
     });
 

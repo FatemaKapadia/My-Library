@@ -16,11 +16,11 @@ private:
 public:
     BookManager(std::unique_ptr<IBookRepository> repository);
 
-    std::vector<Book> getBooks(const std::string& statusFilter = "", const std::string& genreFilter = "");
+    std::vector<Book> getBooks(std::string_view statusFilter = "", std::string_view genreFilter = "");
     Book addBook(Book book);
-    void updateBook(const std::string& id, Book book);
-    bool deleteBook(const std::string& id);
-    std::vector<Book> getTopRecommendations(const std::string& genreFilter = "");
-    std::string getMoodMatch(const std::string& moodQuery);
-    Book searchExternal(const std::string& query);
+    void updateBook(std::string_view id, Book book);
+    bool deleteBook(std::string_view id);
+    std::vector<Book> getTopRecommendations(std::string_view genreFilter = "");
+    std::string getMoodMatch(std::string_view moodQuery);
+    Book searchExternal(std::string_view query);
 };

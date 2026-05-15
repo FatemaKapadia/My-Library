@@ -68,21 +68,16 @@ public:
     void update(const Book& book) override {
         std::lock_guard<std::mutex> lock(mtx);
         auto books = readAll();
-        for (auto& b : books) {
-            if (b.id == book.id) {
-                b = book;
-                break;
-            }
+        if (auto it = std::ranges::find_if(books, [&](const Book& b){ return b.id == book.id; }); it != books.end()) {
+            *it = book;
+            writeAll(books);
         }
-        writeAll(books);
     }
 
     bool remove(const std::string& id) override {
         std::lock_guard<std::mutex> lock(mtx);
         auto books = readAll();
-        auto it = std::remove_if(books.begin(), books.end(), [&](const Book& b){ return b.id == id; });
-        if (it != books.end()) {
-            books.erase(it, books.end());
+        if (auto erased = std::erase_if(books, [&](const Book& b){ return b.id == id; }); erased > 0) {
             writeAll(books);
             return true;
         }

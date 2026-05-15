@@ -1,5 +1,5 @@
 CXX = clang++
-CXXFLAGS = -std=c++14 -Wall -Wextra -pthread -O2
+CXXFLAGS = -std=c++23 -Wall -Wextra -pthread -O2 -Iinclude
 
 SRC_DIR = src
 BIN_DIR = bin
