@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'http://localhost:8080';
 
 // State
 let allBooks = [];
@@ -228,7 +228,7 @@ if (moodBtn) {
                         `;
 
                         // Fetch real metadata in background
-                        fetch(`/api/external/search?q=${encodeURIComponent(match.title + ' ' + match.author)}`)
+                        fetch(`/external/search?q=${encodeURIComponent(match.title + ' ' + match.author)}`)
                             .then(r => r.json())
                             .then(fullBook => {
                                 const card = document.getElementById(cardId);

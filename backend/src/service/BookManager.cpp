@@ -1,5 +1,5 @@
-#include <BookManager.h>
-#include <ExternalApi.h>
+#include <service/BookManager.h>
+#include <infrastructure/ExternalApi.h>
 #include <uuid/uuid.h>
 
 #include <algorithm>

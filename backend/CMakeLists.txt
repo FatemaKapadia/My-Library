@@ -1,29 +1,28 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 project(MyLibraryBackend)
+
+set(CMAKE_POLICY_DEFAULT_CMP0135 NEW)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Find required packages
 find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 
-# Executable
-add_executable(server 
-    src/main.cpp 
-    src/BookManager.cpp
-)
+include(FetchContent)
 
-# Include directories
-target_include_directories(server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# Link libraries
-target_link_libraries(server
-    Threads::Threads
-    CURL::libcurl
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+FetchContent_Declare(nlohmann_json
+  URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
 )
+FetchContent_MakeAvailable(nlohmann_json)
 
-# Output directory: Put the server in a consistent 'bin' folder at the build root
-set_target_properties(server PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+set(HTTPLIB_TEST OFF CACHE INTERNAL "")
+FetchContent_Declare(cpp-httplib
+  GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+  GIT_TAG v0.18.2
 )
+FetchContent_MakeAvailable(cpp-httplib)
+
+add_subdirectory(src)

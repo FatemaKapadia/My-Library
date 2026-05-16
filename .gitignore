@@ -1,6 +1,8 @@
 .idea/*
+*/build/*
 build/*
 .cache/*
+*/.cache/*
 .env
 bin/*
 *.log

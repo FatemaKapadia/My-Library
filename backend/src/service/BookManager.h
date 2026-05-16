@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Book.h>
-#include <BookRepository.h>
+#include <domain/Book.h>
+#include <domain/IBookRepository.h>
 
 #include <memory>
 #include <string>
